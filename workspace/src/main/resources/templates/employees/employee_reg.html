@@ -1,0 +1,49 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>社員名簿Web管理システム（簡易版）</title>
+    <link th:href="@{/css/style.css}" rel="styleSheet" type="text/css">
+    <script th:inline="javascript">
+		const employeeForm = /*[[${employeeAddRequest}]]*/"employeeAddRequest";
+    </script>
+</head>
+<body onload="readFirst()">
+<div th:if="${validationError}" th:each="error : ${validationError}">
+    <label class="text-danger" th:text="${error}"></label>
+</div>
+<form name="myForm" th:action="@{/employees/employee_reg}" th:object="${employeeAddRequest}" th:method="post">
+<table>
+    <thead>
+    <tr>
+        <th class="required">社員ID</th>
+        <td colspan="2"><input type="text" class="txt" th:field="*{employeeId}" placeholder="例）YZ12345678">
+    </tr>
+    <tr>
+        <th class="required">社員名</th>
+        <td><input type="text" class="txt2" th:field="*{familyName}" placeholder="姓">
+        <td><input type="text" class="txt2" th:field="*{firstName}" placeholder="名">
+    </tr>
+    <tr>
+        <th class="required">所属セクション</th>
+        <!--<td colspan="2"><select class="section" id="section_id" name="section_id"> -->
+            <td colspan="2"><select class="section" th:field="*{sectionId}">
+        </select>
+    </tr>
+    <tr>
+        <th class="required">メールアドレス</th>
+        <td colspan="2"><input type="text" class="txt" th:field="*{mail}" placeholder="例）taro_yaz@yaz.co.jp">
+    </tr>
+    <tr>
+        <th class="required">性別</th>
+        <td><div id="genderId"></div>
+    </tr>
+    </thead>
+</table>
+<p class="annotation">必須項目</p>
+<p><input type="submit" name="employeeReg" value="登録"></p>
+</form>
+<a href="../">メニュー画面</a>
+</body>
+<script th:src="@{/js/constant.js}" type="text/javascript"></script>
+</html>

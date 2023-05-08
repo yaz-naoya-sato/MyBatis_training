@@ -1,0 +1,25 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>社員名簿Web管理システム（簡易版）</title>
+    <link th:href="@{/css/style.css}" rel="styleSheet" type="text/css">
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th>社員ID</th>
+        <th>社員名</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="employee : ${employeelist}" th:object="${employee}">
+        <td><a th:href="@{/employees/employee_detail(id=*{id})}" th:text="*{employeeId}"></a></td>
+        <td th:text="*{familyName} + ' ' + *{firstName}"></td>
+    </tr>
+    </tbody>
+</table>
+<a href="../">メニュー画面</a>
+</body>
+</html>

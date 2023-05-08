@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  app:
+    image: eclipse-temurin:17
+    container_name: MyBatis_app
+    ports:
+      - 8080:8080
+    volumes:
+      - ./workspace:/workspace
+    working_dir: /workspace
+    tty: true
+
+  adminer:
+    image: adminer
+    container_name: MyBatis_adminer
+    ports:
+      - 8090:8080
+
+  db:
+    image: postgres
+    container_name: MyBatis_postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - db-store:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=company_directory
+
+volumes:
+  db-store:

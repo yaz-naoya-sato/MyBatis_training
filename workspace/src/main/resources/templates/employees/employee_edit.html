@@ -1,0 +1,87 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>社員名簿Web管理システム（簡易版）</title>
+    <link th:href="@{/css/style.css}" rel="styleSheet" type="text/css">
+    <script th:inline="javascript">
+		const employeeForm = /*[[${employee}]]*/"employee";
+    </script>
+</head>
+<body onload="readFirst()">
+<!--
+ ・th:action
+ formタグのaction属性の内容を置換
+ method="post"のため、Submitボタンが押された時にEmployeeControllerのcreateメソッドを呼ぶ
+ ・th:object
+ オブジェクトを指定
+ ・onsubmit
+ submit押下時のイベント
+ validate.jsのvalidateForm関数を呼び結果をreturn
+ -->
+<form name="myForm" th:action="@{/employees/employee_edit}" th:object="${employee}" method="post">
+    <div th:if="${#arrays.length(#fields.detailedErrors('employeeId'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('employeeId')}">
+            <span th:text="${error.message}"></span>
+        </div>
+    </div>
+    <div th:if="${#arrays.length(#fields.detailedErrors('familyName'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('familyName')}">
+            <span th:text="${error.message}"></span>
+        </div>
+    </div>
+    <div th:if="${#arrays.length(#fields.detailedErrors('firstName'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('firstName')}">
+            <span th:text="${error.message}"></span>
+        </div>
+    </div>
+    <div th:if="${#arrays.length(#fields.detailedErrors('section_id'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('section_id')}">
+            <span th:text="${error.message}"></span>
+        </div>
+    </div>
+    <div th:if="${#arrays.length(#fields.detailedErrors('mail'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('mail')}">
+            <span th:text="${error.message}"></span>
+        </div>
+    </div>
+    <div th:if="${#arrays.length(#fields.detailedErrors('gender_id'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('gender_id')}">
+            <span th:text="${error.message}"></span>
+        </div>
+    </div>
+<table>
+    <thead>
+    <tr>
+        <th>社員ID</th>
+        <td colspan="2" th:text="*{employeeId}"></td>
+    </tr>
+    <tr>
+        <th class="required">社員名</th>
+        <td><input type="text" class="txt2" th:field="*{familyName}" placeholder="姓">
+        <td><input type="text" class="txt2" th:field="*{firstName}" placeholder="名">
+    </tr>
+    <tr>
+        <th class="required">所属セクション</th>
+        <td colspan="2"><select class="section" id="section_id" name="section_id">
+            <!-- <td colspan="2"><select class="section" th:field="*{sectionId}"> -->
+        </select>
+    </tr>
+    <tr>
+        <th class="required">メールアドレス</th>
+        <td colspan="2"><input type="text" class="txt" th:field="*{mail}" placeholder="例）taro_yaz@yaz.co.jp">
+    </tr>
+    <tr>
+        <th class="required">性別</th>
+        <td><div id="gender_id"></div>
+    </tr>
+    </thead>
+</table>
+<p class="annotation">必須項目</p>
+<p><input type="submit" name="employeeEdit" value="更新"></p>
+</form>
+<a href="../">メニュー画面</a>
+</body>
+<script th:src="@{/js/validate.js}" type="text/javascript"></script>
+<script th:src="@{/js/constant.js}" type="text/javascript"></script>
+</html>

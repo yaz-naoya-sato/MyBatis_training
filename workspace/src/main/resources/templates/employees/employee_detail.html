@@ -1,0 +1,54 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>社員名簿Web管理システム（簡易版）</title>
+    <link th:href="@{/css/style.css}" rel="styleSheet" type="text/css">
+</head>
+<body>
+<table th:each="employee : ${employee}" th:object="${employee}">
+    <thead>
+    <tr>
+        <th>社員ID</th>
+        <td th:text="*{employeeId}"></td>
+    </tr>
+    <tr>
+        <th>社員名</th>
+        <td th:text="|*{familyName} *{firstName}|"></td>
+    </tr>
+    <tr>
+        <th>所属セクション</th>
+        <td th:switch="*{section_id}">
+            <span th:case="1">シス開</span>
+            <span th:case="2">グロカル</span>
+            <span th:case="3">ビジソル</span>
+            <span th:case="*">対象なし</span>
+        </td>
+    </tr>
+    <tr>
+        <th>メールアドレス</th>
+        <td th:text="*{mail}"></td>
+    </tr>
+    <tr>
+        <th>性別</th>
+        <td th:switch="*{gender_id}">
+            <span th:case="1">男性</span>
+            <span th:case="2">女性</span>
+            <span th:case="*">対象なし</span>
+        </td>
+    </tr>
+    </thead>
+</table>
+<div style="display:inline-flex; gap: 6px 4px">
+<form method="post" th:action="@{/employees/employee_edit}">
+    <button type="submit">編集</button>
+</form>
+<form method="post" th:action="@{/employees/employee_result}" onsubmit="return deleteDialog()">
+    <button type="submit" name="employeeDelete">削除</button>
+</form>
+</div>
+<div><a href="./employee_list">会員一覧画面</a></div>
+<div><a href="../">メニュー画面</a></div>
+</body>
+<script th:src="@{/js/constant.js}" type="text/javascript"></script>
+</html>
