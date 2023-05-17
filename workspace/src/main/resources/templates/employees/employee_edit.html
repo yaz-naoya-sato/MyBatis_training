@@ -35,8 +35,8 @@
             <span th:text="${error.message}"></span>
         </div>
     </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('section_id'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('section_id')}">
+    <div th:if="${#arrays.length(#fields.detailedErrors('sectionId'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('sectionId')}">
             <span th:text="${error.message}"></span>
         </div>
     </div>
@@ -45,8 +45,8 @@
             <span th:text="${error.message}"></span>
         </div>
     </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('gender_id'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('gender_id')}">
+    <div th:if="${#arrays.length(#fields.detailedErrors('genderId'))} > 0" class="row">
+        <div th:each="error : ${#fields.detailedErrors('genderId')}">
             <span th:text="${error.message}"></span>
         </div>
     </div>
@@ -63,8 +63,7 @@
     </tr>
     <tr>
         <th class="required">所属セクション</th>
-        <td colspan="2"><select class="section" id="section_id" name="section_id">
-            <!-- <td colspan="2"><select class="section" th:field="*{sectionId}"> -->
+        <td colspan="2"><select class="section" th:field="*{sectionId}">
         </select>
     </tr>
     <tr>
@@ -73,7 +72,7 @@
     </tr>
     <tr>
         <th class="required">性別</th>
-        <td><div id="gender_id"></div>
+        <td><div id="genderId"></div>
     </tr>
     </thead>
 </table>

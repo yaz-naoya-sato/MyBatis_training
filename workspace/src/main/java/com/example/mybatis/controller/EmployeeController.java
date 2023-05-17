@@ -1,31 +1,50 @@
 package com.example.mybatis.controller;
 
 import com.example.mybatis.dto.EmployeeAddRequest;
-import com.example.mybatis.dto.EmployeeSearchRequest;
+import com.example.mybatis.dto.EmployeeUpdateRequest;
 import com.example.mybatis.entity.Employee;
 import com.example.mybatis.service.EmployeeService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/employees")
+@SessionAttributes(types = Employee.class)
 public class EmployeeController {
+    // LOGGER 共通化実施予定 TODO
+    private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
     @Autowired
     private EmployeeService employeeService;
+
+    /**
+     * セッション作成
+     * @return
+     */
+    @ModelAttribute("employee")
+    private Employee setEmployee() {
+        return new Employee();
+    }
 
     /**
      * 社員情報登録画面の呼び出し
@@ -45,6 +64,7 @@ public class EmployeeController {
      * @return ユーザー情報一覧画面
      */
     @RequestMapping(value = "/employee_reg", method = RequestMethod.POST)
+    @Transactional
     public String create(@Validated @ModelAttribute EmployeeAddRequest employeeAddRequest,
                          BindingResult result,
                          Model model) {
@@ -91,9 +111,135 @@ public class EmployeeController {
 
         // 変数名employeesに値をセット
         model.addAttribute("employeelist", employeeList);
-        model.addAttribute("employeeSearchRequest", new EmployeeSearchRequest());
 
         return "employees/employee_list";
+    }
+
+    /**
+     * 社員情報参照画面の表示
+     * @param id
+     * @param model
+     * @return
+     */
+    @GetMapping("/employee_detail")
+    public String displayDetail(@RequestParam("id") Integer id, Model model){
+
+        // IDによるEmployeeテーブルの検索
+        Employee employee = employeeService.findById(id);
+
+        model.addAttribute("employee",employee);
+
+        // 社員情報詳細画面の返却
+        return "employees/employee_detail";
+    }
+
+    /**
+     * 社員情報編集画面の表示
+     * (社員情報参照画面の情報をsessionで持つ)
+     * @return
+     */
+    @PostMapping("/employee_edit")
+    public String initEdit(@ModelAttribute("employee") Employee employeeSession, Model model) {
+
+        // employeeをSessionで保持しているため、modelへのadd不要
+        return "employees/employee_edit";
+
+    }
+
+    /**
+     * Postされた社員情報のDB登録
+     * @param employee 社員(employee)テーブルのエンティティ
+     * @param bindingResult バリデーション結果を表すI/F
+     * @param model モデル属性を定義
+     * @return 社員情報登録_結果画面
+     */
+    @PostMapping(value="/employee_edit", params="employeeEdit")
+    public String employeeEdit(@ModelAttribute @Validated EmployeeUpdateRequest employee,
+                               BindingResult bindingResult,
+                               Model model) {
+
+        try {
+            logger.debug("POSTされた社員情報のバリデーションを実施します。");
+            // 入力チェック判定
+
+            if (bindingResult.hasErrors()){
+                logger.warn("入力チェックエラーが発生しました。");
+
+                model.addAttribute(employee);
+                return "employees/employee_edit";
+            }
+
+            logger.debug("社員情報更新メソッド(service)の呼び出しを実施します。");
+            // update
+            employeeService.update(employee);
+
+            // employeeに入力フォームの内容が格納されているため初期化
+            model.addAttribute("employee", new Employee());
+
+            // DBコミットが成功した場合は、成功メッセージを表示
+            model.addAttribute("res", "データを更新しました");
+
+            // catchが冗長のため共通化対応 TODO
+        } catch (CannotCreateTransactionException ex) {
+            // トランザクションを作成できない場合は、失敗メッセージを表示
+            logger.error("トランザクションの作成に失敗しました。\r\n" + ex);
+            model.addAttribute("res","データ更新に失敗しました");
+        } catch (IllegalArgumentException ex) {
+            // 不正、不適切な引数エラー
+            logger.error("不正な引数が渡されました。\r\n" + ex);
+            model.addAttribute("res","データ更新に失敗しました");
+        } catch (DataAccessException ex) {
+            // データアクセス例外
+            logger.error("データアクセス例外が発生しました。\r\n" + ex);
+            model.addAttribute("res","データ更新に失敗しました");
+        } catch (Exception ex) {
+            // DBコミットが失敗した場合は、失敗メッセージを表示
+            logger.error("予期しないエラーが発生しました。\r\n" + ex);
+            model.addAttribute("res","データ更新に失敗しました");
+        }
+        // 社員情報登録_結果画面の返却
+        return "employees/employee_result";
+    }
+
+    /**
+     * Postされた社員情報の削除
+     * @param employee 削除対象の社員情報
+     * @param model
+     * @return 社員情報削除_結果画面
+     */
+    @PostMapping(value="/employee_result", params="employeeDelete")
+    public String employeeDelete(@ModelAttribute Employee employee,
+                                 Model model) {
+
+        try {
+            // update
+            employeeService.delete(employee);
+
+            // employeeに入力フォームの内容が格納されているため初期化
+            model.addAttribute("employee", new Employee());
+
+            // DBコミットが成功した場合は、成功メッセージを表示
+            model.addAttribute("res", "データを削除しました");
+
+            // catchが冗長のため共通化対応 TODO
+        } catch (CannotCreateTransactionException ex) {
+            // トランザクションを作成できない場合は、失敗メッセージを表示
+            model.addAttribute("res","データ削除に失敗しました");
+        } catch (IllegalArgumentException ex) {
+            // 不正、不適切な引数エラー
+            model.addAttribute("res","データ削除に失敗しました");
+        } catch (OptimisticLockingFailureException ex) {
+            // 対象データなしエラー
+            model.addAttribute("res","データ削除に失敗しました");
+        } catch (DataAccessException ex) {
+            // データアクセス例外
+            model.addAttribute("res","データ削除に失敗しました");
+        } catch (Exception ex) {
+            // DBコミットが失敗した場合は、失敗メッセージを表示
+            model.addAttribute("res","データ削除に失敗しました");
+        }
+        // 社員情報登録_結果画面の返却
+        return "employees/employee_result";
     }
 
 

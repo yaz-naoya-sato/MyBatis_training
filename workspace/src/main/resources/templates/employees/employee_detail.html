@@ -18,7 +18,7 @@
     </tr>
     <tr>
         <th>所属セクション</th>
-        <td th:switch="*{section_id}">
+        <td th:switch="*{sectionId}">
             <span th:case="1">シス開</span>
             <span th:case="2">グロカル</span>
             <span th:case="3">ビジソル</span>
@@ -31,7 +31,7 @@
     </tr>
     <tr>
         <th>性別</th>
-        <td th:switch="*{gender_id}">
+        <td th:switch="*{genderId}">
             <span th:case="1">男性</span>
             <span th:case="2">女性</span>
             <span th:case="*">対象なし</span>

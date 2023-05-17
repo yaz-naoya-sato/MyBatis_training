@@ -17,6 +17,19 @@
         ORDER BY employee_id
     </select>
 
+    <!-- テスト用全件検索 -->
+    <select id="testFindAll" resultType="com.example.mybatis.entity.Employee">
+        SELECT id
+        , employee_id AS employeeId
+        , family_name AS familyName
+        , first_name AS firstName
+        , section_id AS sectionId
+        , mail
+        , gender_id AS genderId
+        FROM employee
+        for update nowait
+    </select>
+
     <!-- 主キー検索 -->
     <select id="findById" resultType="com.example.mybatis.entity.Employee">
         SELECT id
@@ -51,11 +64,18 @@
 
     <!-- 更新 -->
     <update id="update">
-        UPDATE userinfo SET name = #{name}, address = #{address}, phone = #{phone}, update_date = CURRENT_TIMESTAMP WHERE id = #{id}
+        UPDATE employee SET
+        employee_Id = #{employeeId}
+        , family_name = #{familyName}
+        , first_name = #{firstName}
+        , section_id = #{sectionId}
+        , mail = #{mail}
+        , gender_id = #{genderId}
+        WHERE id = #{id}
     </update>
 
-    <!-- 論理削除 -->
-    <update id="delete">
-        UPDATE userinfo SET delete_date = CURRENT_TIMESTAMP WHERE id = #{id}
-    </update>
+    <!-- 物理削除 -->
+    <delete id="delete">
+        DELETE FROM employee WHERE id = #{id}
+    </delete>
 </mapper>
