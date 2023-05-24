@@ -13,9 +13,9 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -24,7 +24,10 @@ import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -147,8 +150,13 @@ public class EmployeeControllerTest {
                     .get("/employees/employee_list") // 一覧画面をGETで取得
                     .accept(MediaType.TEXT_HTML);
 
+            List<Employee> employeeList = employeeService.findAll();
+
             mvc.perform(requestBuilder)
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("employees/employee_list"))
+                    .andExpect(model().attribute("employeelist",employeeList));
+
         }
 
         @Test
@@ -161,7 +169,9 @@ public class EmployeeControllerTest {
                     .accept(MediaType.TEXT_HTML);
 
             mvc.perform(requestBuilder)
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+//                    .andExpect(model().attribute("id", "4"))
+            ;
         }
 
         @Test
@@ -1301,15 +1311,14 @@ public class EmployeeControllerTest {
                         .accept(MediaType.TEXT_HTML);
 
 
-                MvcResult result = mvc.perform(requestBuilder)
+                mvc.perform(requestBuilder)
                         .andExpect(status().isOk())
                         // 次画面の遷移先がemployee_resultであることを確認
                         .andExpect(view().name("employees/employee_result"))
                         // オブジェクトのresに設定される値が正しいことを確認
                         .andExpect(model().attribute("res", "データを更新しました"))
                         // Modelオブジェクトにエラーがないことを確認
-                        .andExpect(model().hasNoErrors())
-                        .andReturn();
+                        .andExpect(model().hasNoErrors());
 
             }
         }
@@ -1318,6 +1327,175 @@ public class EmployeeControllerTest {
     @Nested
     @DisplayName("削除")
     class deleteEmployee {
+
+        @Nested
+        @DisplayName("異常系")
+        class deleteError {
+
+            @Test
+            @DisplayName("GETで呼び出し")
+            public void deleteGetTest() throws Exception {
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .get("/employees/employee_delete") // 更新をGETで実施
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 更新用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().is4xxClientError()); // 405 METHOD_NOT_ALLOWED となることを確認
+
+            }
+
+            @Test
+            @DisplayName("トランザクション作成エラー")
+            public void deleteCannotCreateTransactionException() throws Exception {
+
+                // 非検査例外(RuntimeException系)ならスローできる
+                doThrow(new CannotCreateTransactionException("")).when(employeeService).delete(Mockito.any());
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .post("/employees/employee_result") // 更新をGETで実施
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 更新用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().isOk()) // 405 METHOD_NOT_ALLOWED となることを確認
+                        .andExpect(view().name("employees/employee_result"))
+                        // オブジェクトのresに設定される値が正しいことを確認
+                        .andExpect(model().attribute("res", "データ削除に失敗しました"))
+                        // Modelオブジェクトにエラーがないことを確認
+                        .andExpect(model().hasNoErrors());
+
+            }
+
+            @Test
+            @DisplayName("不正、不適切な引数エラー")
+            public void deleteIllegalArgumentException() throws Exception {
+
+                // 非検査例外(RuntimeException系)ならスローできる
+                doThrow(new IllegalArgumentException("")).when(employeeService).delete(Mockito.any());
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .post("/employees/employee_result") // 削除をPOST
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 更新用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().isOk()) // 405 METHOD_NOT_ALLOWED となることを確認
+                        .andExpect(view().name("employees/employee_result"))
+                        // オブジェクトのresに設定される値が正しいことを確認
+                        .andExpect(model().attribute("res", "データ削除に失敗しました"))
+                        // Modelオブジェクトにエラーがないことを確認
+                        .andExpect(model().hasNoErrors());
+
+            }
+
+            @Test
+            @DisplayName("削除対象データなしエラー")
+            public void deleteOptimisticLockingFailureException() throws Exception {
+
+                // 非検査例外(RuntimeException系)ならスローできる
+                doThrow(new OptimisticLockingFailureException("")).when(employeeService).delete(Mockito.any());
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .post("/employees/employee_result") // 更新をGETで実施
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 更新用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().isOk()) // 405 METHOD_NOT_ALLOWED となることを確認
+                        .andExpect(view().name("employees/employee_result"))
+                        // オブジェクトのresに設定される値が正しいことを確認
+                        .andExpect(model().attribute("res", "データ削除に失敗しました"))
+                        // Modelオブジェクトにエラーがないことを確認
+                        .andExpect(model().hasNoErrors());
+
+            }
+
+            @Test
+            @DisplayName("データアクセスエラー")
+            public void deleteDataAccessException() throws Exception {
+
+                // 非検査例外(RuntimeException系)ならスローできる
+                doThrow(new CannotAcquireLockException("")).when(employeeService).delete(Mockito.any());
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .post("/employees/employee_result") // 更新をGETで実施
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 更新用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().isOk()) // 405 METHOD_NOT_ALLOWED となることを確認
+                        .andExpect(view().name("employees/employee_result"))
+                        // オブジェクトのresに設定される値が正しいことを確認
+                        .andExpect(model().attribute("res", "データ削除に失敗しました"))
+                        // Modelオブジェクトにエラーがないことを確認
+                        .andExpect(model().hasNoErrors());
+
+            }
+
+            @Test
+            @DisplayName("予期しないエラー")
+            public void deleteException() throws Exception {
+
+                // 非検査例外(RuntimeException系)ならスローできる
+                doThrow(new RuntimeException(new Exception())).when(employeeService).delete(Mockito.any());
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .post("/employees/employee_result") // 更新をGETで実施
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 更新用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().isOk()) // 405 METHOD_NOT_ALLOWED となることを確認
+                        .andExpect(view().name("employees/employee_result"))
+                        // オブジェクトのresに設定される値が正しいことを確認
+                        .andExpect(model().attribute("res", "データ削除に失敗しました"))
+                        // Modelオブジェクトにエラーがないことを確認
+                        .andExpect(model().hasNoErrors());
+
+            }
+        }
+
+        @Nested
+        @DisplayName("正常系")
+        class deleteSuccess {
+
+            @Test
+            @DisplayName("削除可能")
+            public void delete() throws Exception {
+
+                RequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .post("/employees/employee_result") // 削除を実施
+                        .param("employeeDelete", "employeeDelete") // POSTリクエストパラメーター
+                        .params(updOkParams())                       // 削除用パラメータ
+                        .accept(MediaType.TEXT_HTML);
+
+                mvc.perform(requestBuilder)
+                        .andExpect(status().isOk())
+                        // 200ステータスを返却することを確認
+                        .andExpect(view().name("employees/employee_result"))
+                        // オブジェクトのresに設定される値が正しいことを確認
+                        .andExpect(model().attribute("res", "データを削除しました"))
+                        // Modelオブジェクトにエラーがないことを確認
+                        .andExpect(model().hasNoErrors());
+
+                // 削除したデータと同じIDでの抽出結果がNullであることを確認
+                assertNull(employeeService.findById(4));
+            }
+
+        }
 
     }
 }

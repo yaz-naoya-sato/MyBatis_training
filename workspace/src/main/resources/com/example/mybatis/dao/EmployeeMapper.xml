@@ -17,19 +17,6 @@
         ORDER BY employee_id
     </select>
 
-    <!-- テスト用全件検索 -->
-    <select id="testFindAll" resultType="com.example.mybatis.entity.Employee">
-        SELECT id
-        , employee_id AS employeeId
-        , family_name AS familyName
-        , first_name AS firstName
-        , section_id AS sectionId
-        , mail
-        , gender_id AS genderId
-        FROM employee
-        for update nowait
-    </select>
-
     <!-- 主キー検索 -->
     <select id="findById" resultType="com.example.mybatis.entity.Employee">
         SELECT id
