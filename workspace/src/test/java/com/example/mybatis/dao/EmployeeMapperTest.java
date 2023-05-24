@@ -46,8 +46,10 @@ public class EmployeeMapperTest {
         newAdd.setMail("test_yaz@yaz.co.jp");
         newAdd.setGenderId(1);
 
+        // バリデーションテスト
         Set<ConstraintViolation<EmployeeAddRequest>> violations = validator.validate(newAdd);
 
+        // バリデーションエラーがないことを確認
         assertFalse(violations.isEmpty());
 
         assertThrows(Exception.class, () -> employeeMapper.save(newAdd));

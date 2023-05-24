@@ -5,10 +5,13 @@
     <title>社員名簿Web管理システム（簡易版）</title>
     <link th:href="@{/css/style.css}" rel="styleSheet" type="text/css">
     <script th:inline="javascript">
-		const employeeForm = /*[[${employee}]]*/"employee";
+		const employeeForm = /*[[${employeeUpdateRequest}]]*/"employeeUpdateRequest";
     </script>
 </head>
 <body onload="readFirst()">
+<div th:if="${validationError}" th:each="error : ${validationError}">
+    <label class="text-danger" th:text="${error}"></label>
+</div>
 <!--
  ・th:action
  formタグのaction属性の内容を置換
@@ -19,42 +22,14 @@
  submit押下時のイベント
  validate.jsのvalidateForm関数を呼び結果をreturn
  -->
-<form name="myForm" th:action="@{/employees/employee_edit}" th:object="${employee}" method="post">
-    <div th:if="${#arrays.length(#fields.detailedErrors('employeeId'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('employeeId')}">
-            <span th:text="${error.message}"></span>
-        </div>
-    </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('familyName'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('familyName')}">
-            <span th:text="${error.message}"></span>
-        </div>
-    </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('firstName'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('firstName')}">
-            <span th:text="${error.message}"></span>
-        </div>
-    </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('sectionId'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('sectionId')}">
-            <span th:text="${error.message}"></span>
-        </div>
-    </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('mail'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('mail')}">
-            <span th:text="${error.message}"></span>
-        </div>
-    </div>
-    <div th:if="${#arrays.length(#fields.detailedErrors('genderId'))} > 0" class="row">
-        <div th:each="error : ${#fields.detailedErrors('genderId')}">
-            <span th:text="${error.message}"></span>
-        </div>
-    </div>
+<form name="myForm" th:action="@{/employees/employee_edit}" th:object="${employeeUpdateRequest}" method="post">
 <table>
     <thead>
+    <input type="hidden" th:field="*{id}">
     <tr>
         <th>社員ID</th>
         <td colspan="2" th:text="*{employeeId}"></td>
+        <input type="hidden" th:field="*{employeeId}">
     </tr>
     <tr>
         <th class="required">社員名</th>
