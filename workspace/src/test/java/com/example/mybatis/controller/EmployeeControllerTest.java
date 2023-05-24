@@ -12,9 +12,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
@@ -35,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class) // @Orderアノテーションででテスト順序を指定したい場合
 @ExtendWith(MockitoExtension.class) // JUnit+Mockitoの場合
+@SpringBootTest
+@AutoConfigureMockMvc
 @MockitoSettings(strictness = Strictness.LENIENT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD) // デフォルトはPER_METHOD
 public class EmployeeControllerTest {
@@ -170,7 +175,7 @@ public class EmployeeControllerTest {
 
             mvc.perform(requestBuilder)
                     .andExpect(status().isOk())
-//                    .andExpect(model().attribute("id", "4"))
+//                    .andExpect(model().attribute("employee", "4"))
             ;
         }
 
@@ -187,13 +192,22 @@ public class EmployeeControllerTest {
             employee.setMail("taro_yaz@yaz.co.jp");
             employee.setGenderId(1);
 
+            MockHttpSession mockSession = new MockHttpSession();
+            mockSession.setAttribute("employee", employee);
+
             RequestBuilder requestBuilder = MockMvcRequestBuilders
-                    .post("/employees/employee_edit") // 一覧画面をGETで取得
-                    // Sessionを渡す　TODO
+                    .post("/employees/employee_edit")
+                        // 編集画面をPOSTで取得
+//                    .session(mockSession)
+                        // Sessionを渡す
+                    .flashAttr("employee", employee)
                     .accept(MediaType.TEXT_HTML);
 
             mvc.perform(requestBuilder)
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("employees/employee_edit"))
+                    .andExpect(model().attribute("employee",employee))
+            ;
         }
 
     }

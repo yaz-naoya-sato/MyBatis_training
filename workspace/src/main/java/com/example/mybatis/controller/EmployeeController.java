@@ -135,15 +135,14 @@ public class EmployeeController {
     @PostMapping("/employee_edit")
     public String initEdit(@ModelAttribute("employee") Employee employeeSession, Model model) {
 
-        Employee employee = employeeService.findById(employeeSession.getId());
         EmployeeUpdateRequest employeeUpd = new EmployeeUpdateRequest();
-        employeeUpd.setId(employee.getId());
-        employeeUpd.setEmployeeId(employee.getEmployeeId());
-        employeeUpd.setFamilyName(employee.getFamilyName());
-        employeeUpd.setFirstName(employee.getFirstName());
-        employeeUpd.setSectionId(employee.getSectionId());
-        employeeUpd.setMail(employee.getMail());
-        employeeUpd.setGenderId(employee.getGenderId());
+        employeeUpd.setId(employeeSession.getId());
+        employeeUpd.setEmployeeId(employeeSession.getEmployeeId());
+        employeeUpd.setFamilyName(employeeSession.getFamilyName());
+        employeeUpd.setFirstName(employeeSession.getFirstName());
+        employeeUpd.setSectionId(employeeSession.getSectionId());
+        employeeUpd.setMail(employeeSession.getMail());
+        employeeUpd.setGenderId(employeeSession.getGenderId());
 
         model.addAttribute("employeeUpdateRequest", employeeUpd);
 
