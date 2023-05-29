@@ -27,9 +27,8 @@
     <thead>
     <input type="hidden" th:field="*{id}">
     <tr>
-        <th>社員ID</th>
-        <td colspan="2" th:text="*{employeeId}"></td>
-        <input type="hidden" th:field="*{employeeId}">
+        <th class="required">社員ID</th>
+        <td colspan="2"><input type="text" readonly="readonly" class="txt" th:field="*{employeeId}"></td>
     </tr>
     <tr>
         <th class="required">社員名</th>
@@ -54,7 +53,8 @@
 <p class="annotation">必須項目</p>
 <p><input type="submit" name="employeeEdit" value="更新"></p>
 </form>
-<a href="../">メニュー画面</a>
+<div><a href="./employee_list">社員一覧画面</a></div>
+<div><a href="../">メニュー画面</a></div>
 </body>
 <script th:src="@{/js/validate.js}" type="text/javascript"></script>
 <script th:src="@{/js/constant.js}" type="text/javascript"></script>
