@@ -11,15 +11,31 @@
     <tr>
         <th>社員ID</th>
         <th>社員名</th>
+        <th>所属セクション</th>
+        <th>メールアドレス</th>
+        <th>性別</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="employee : ${employeelist}" th:object="${employee}">
         <td><a th:href="@{/employees/employee_detail(id=*{id})}" th:text="*{employeeId}"></a></td>
         <td th:text="*{familyName} + ' ' + *{firstName}"></td>
+        <td th:switch="*{sectionId}">
+            <span th:case="1">シス開</span>
+            <span th:case="2">グロカル</span>
+            <span th:case="3">ビジソル</span>
+            <span th:case="*">対象なし</span>
+        </td>
+        <td th:text="*{mail}"></td>
+        <td th:switch="*{genderId}">
+            <span th:case="1">男性</span>
+            <span th:case="2">女性</span>
+            <span th:case="*">対象なし</span>
+        </td>
     </tr>
     </tbody>
 </table>
-<a href="../">メニュー画面</a>
+<div><a href="./employee_reg">社員登録画面</a></div>
+<div><a href="../">メニュー画面</a></div>
 </body>
 </html>
