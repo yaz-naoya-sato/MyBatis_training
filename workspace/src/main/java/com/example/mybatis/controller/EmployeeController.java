@@ -135,6 +135,12 @@ public class EmployeeController {
     @PostMapping("/employee_edit")
     public String initEdit(@ModelAttribute("employee") Employee employeeSession, Model model) {
 
+        // employeeテーブルの存在チェック
+        if(null == employeeService.findById(employeeSession.getId())){
+            model.addAttribute("res","データ更新対象が存在しません");
+            return "employees/employee_result";
+        }
+
         EmployeeUpdateRequest employeeUpd = new EmployeeUpdateRequest();
         employeeUpd.setId(employeeSession.getId());
         employeeUpd.setEmployeeId(employeeSession.getEmployeeId());
@@ -152,7 +158,7 @@ public class EmployeeController {
     }
 
     /**
-     * Postされた社員情報のDB登録
+     * Postされた社員情報のDB編集
      * @param employeeUpdateRequest 更新リクエストデータ
      * @param bindingResult バリデーション結果を表すI/F
      * @param model モデル属性を定義
@@ -182,34 +188,40 @@ public class EmployeeController {
 
         try {
             logger.debug("社員情報更新メソッド(service)の呼び出しを実施します。");
-            // update
-             employeeService.update(employeeUpdateRequest);
+
+            // employeeテーブルの存在チェック
+            if(null == employeeService.findById(employeeUpdateRequest.getId())){
+                model.addAttribute("res","データ更新対象が存在しません");
+            } else {
+                // update
+                employeeService.update(employeeUpdateRequest);
+
+                // DBコミットが成功した場合は、成功メッセージを表示
+                model.addAttribute("res", "データを更新しました");
+            }
+
+
             // catchが冗長のため共通化対応 TODO
         } catch (CannotCreateTransactionException ex) {
             // トランザクションを作成できない場合は、失敗メッセージを表示
             logger.error("トランザクションの作成に失敗しました。\r\n" + ex);
             model.addAttribute("res","データ更新に失敗しました");
-            return "employees/employee_result";
         } catch (IllegalArgumentException ex) {
             // 不正、不適切な引数エラー
             logger.error("不正な引数が渡されました。\r\n" + ex);
             model.addAttribute("res","データ更新に失敗しました");
-            return "employees/employee_result";
         } catch (DataAccessException ex) {
             // データアクセス例外
             logger.error("データアクセス例外が発生しました。\r\n" + ex);
             model.addAttribute("res","データ更新に失敗しました");
-            return "employees/employee_result";
         } catch (Exception ex) {
             // DBコミットが失敗した場合は、失敗メッセージを表示
             logger.error("予期しないエラーが発生しました。\r\n" + ex);
             model.addAttribute("res","データ更新に失敗しました");
-            return "employees/employee_result";
         }
         // employeeに入力フォームの内容が格納されているため初期化
         model.addAttribute("employee", new Employee());
-        // DBコミットが成功した場合は、成功メッセージを表示
-        model.addAttribute("res", "データを更新しました");
+
         // 社員情報登録_結果画面の返却
         return "employees/employee_result";
     }
@@ -225,14 +237,17 @@ public class EmployeeController {
                                  Model model) {
 
         try {
-            // update
-            employeeService.delete(employee);
 
-            // employeeに入力フォームの内容が格納されているため初期化
-            model.addAttribute("employee", new Employee());
+            // employeeテーブルの存在チェック
+            if(null == employeeService.findById(employee.getId())){
+                model.addAttribute("res","データ削除対象が存在しません");
+            } else {
+                // update
+                employeeService.delete(employee);
 
-            // DBコミットが成功した場合は、成功メッセージを表示
-            model.addAttribute("res", "データを削除しました");
+                // DBコミットが成功した場合は、成功メッセージを表示
+                model.addAttribute("res", "データを削除しました");
+            }
 
             // catchが冗長のため共通化対応 TODO
         } catch (CannotCreateTransactionException ex) {
