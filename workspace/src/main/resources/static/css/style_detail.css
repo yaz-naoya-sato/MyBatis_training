@@ -1,0 +1,59 @@
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+th {
+    text-align: left;
+}
+th.th-key {
+  width: 10%;
+}
+
+td.td-value {
+  width: 90%;
+}
+
+.long {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+
+/* テキストボックス,セレクトボックス */
+.txt,.section{
+    display: inline-block;
+    width: 100%;
+    padding: 0.5em;
+    border: 1px solid #999;
+    box-sizing: border-box;
+    background: #f2f2f2;
+    margin: 0.5em 0;
+}
+
+/* テキストボックス(姓,名)*/
+.txt2{
+    display: inline-block;
+    width: 10em;
+    padding: 0.5em;
+    border: 1px solid #999;
+    box-sizing: border-box;
+    background: #f2f2f2;
+    margin: 0.5em 0;
+}
+
+/*必須項目*/
+.required::after {
+  content: " *";
+  color: red;
+  vertical-align: middle;
+}
+
+/*必須項目(注釈)*/
+.annotation::before {
+  content: "* ";
+  color: red;
+  vertical-align: middle;
+}

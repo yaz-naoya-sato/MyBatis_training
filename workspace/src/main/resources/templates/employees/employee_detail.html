@@ -3,22 +3,22 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title>社員名簿Web管理システム（簡易版）</title>
-    <link th:href="@{/css/style.css}" rel="styleSheet" type="text/css">
+    <link th:href="@{/css/style_detail.css}" rel="styleSheet" type="text/css">
 </head>
 <body>
 <table th:each="employee : ${employee}" th:object="${employee}">
     <thead>
     <tr>
-        <th>社員ID</th>
-        <td th:text="*{employeeId}"></td>
+        <th class="th-key">社員ID</th>
+        <td class="td-value" th:text="*{employeeId}"></td>
     </tr>
     <tr>
-        <th>社員名</th>
-        <td th:text="|*{familyName} *{firstName}|"></td>
+        <th class="th-key">社員名</th>
+        <td class="td-value long" th:text="|*{familyName} *{firstName}|"></td>
     </tr>
     <tr>
-        <th>所属セクション</th>
-        <td th:switch="*{sectionId}">
+        <th class="th-key">所属セクション</th>
+        <td class="td-value" th:switch="*{sectionId}">
             <span th:case="1">シス開</span>
             <span th:case="2">グロカル</span>
             <span th:case="3">ビジソル</span>
@@ -26,12 +26,12 @@
         </td>
     </tr>
     <tr>
-        <th>メールアドレス</th>
-        <td th:text="*{mail}"></td>
+        <th class="th-key">メールアドレス</th>
+        <td class="td-value long" th:text="*{mail}"></td>
     </tr>
     <tr>
-        <th>性別</th>
-        <td th:switch="*{genderId}">
+        <th class="th-key">性別</th>
+        <td class="td-value" th:switch="*{genderId}">
             <span th:case="1">男性</span>
             <span th:case="2">女性</span>
             <span th:case="*">対象なし</span>

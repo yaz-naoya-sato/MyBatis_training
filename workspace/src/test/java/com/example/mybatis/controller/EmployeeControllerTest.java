@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
@@ -192,8 +191,8 @@ public class EmployeeControllerTest {
             employee.setMail("taro_yaz@yaz.co.jp");
             employee.setGenderId(1);
 
-            MockHttpSession mockSession = new MockHttpSession();
-            mockSession.setAttribute("employee", employee);
+//            MockHttpSession mockSession = new MockHttpSession();
+//            mockSession.setAttribute("employee", employee);
 
             RequestBuilder requestBuilder = MockMvcRequestBuilders
                     .post("/employees/employee_edit")
